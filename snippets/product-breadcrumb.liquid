@@ -1,23 +1,76 @@
 <nav class="product__breadcrumb breadcrumb hidden lg:flex" role="navigation" aria-label="breadcrumbs" {{ block.shopify_attributes }}>
   <ul class="inline-flex gap-4 md:gap-6">
+    <!-- Home link -->
     <li class="flex items-center gap-4 md:gap-6">
       <a class="block" href="{{ routes.root_url }}" title="{{ 'general.breadcrumbs.home_link_title' | t | escape }}">
         {%- render 'icon', icon: 'home', size: 'sm' -%}
       </a>
     </li>
+
     {%- if block.settings.show_collections_link -%}
       <li class="flex items-center gap-4 md:gap-6">
         <a class="reversed-link" href="{{ routes.collections_url }}">{{ 'general.breadcrumbs.collections' | t }}</a>
       </li>
     {%- endif -%}
-    <li class="flex items-center gap-4 md:gap-6">
-      {%- liquid
-        if collection == blank
-          assign collection = product.collections | first
+
+    {%- liquid
+      # Find the subcollection (one that has a parent)
+      assign subcollection = nil
+      assign parent_collection = nil
+      
+      for c in product.collections
+        if c.metafields.custom.parent_collection != blank
+          assign subcollection = c
+          assign parent_collection = c.metafields.custom.parent_collection.value
+          break
         endif
-      -%}
-      <a class="reversed-link" href="{{ collection.url }}">{{ collection.title }}</a>
-    </li>
-    <li class="flex items-center gap-4 md:gap-6">{{ product.title }}</li>
+      endfor
+      
+      # If no subcollection found, use the first collection
+      if subcollection == blank
+        assign current_collection = product.collections | first
+      else
+        assign current_collection = subcollection
+      endif
+    -%}
+    {% if parent_collection != blank and subcollection != blank %}
+      <!-- Parent collection -->
+      <li class="flex items-center gap-4 md:gap-6">
+        <a class="reversed-link parent__collection"  href="{{ parent_collection.url }}">
+          {% if parent_collection.metafields.custom.breadcrumb_title != blank %}
+            {{ parent_collection.metafields.custom.breadcrumb_title }}
+          {% else %}
+            {{ parent_collection.title }}
+          {% endif %}
+        </a>
+      </li>
+      
+      <!-- Subcollection -->
+      <li class="flex items-center gap-4 md:gap-6">
+        <a class="reversed-link" href="{{ subcollection.url }}">
+          {% if subcollection.metafields.custom.breadcrumb_title != blank %}
+            {{ subcollection.metafields.custom.breadcrumb_title }}
+          {% else %}
+            {{ subcollection.title }}
+          {% endif %}
+        </a>
+      </li>
+    {% else %}
+      <!-- Just the current collection (no parent) -->
+      <li class="flex items-center gap-4 md:gap-6">
+        <a class="reversed-link" href="{{ current_collection.url }}">
+          {% if current_collection.metafields.custom.breadcrumb_title != blank %}
+            {{ current_collection.metafields.custom.breadcrumb_title }}
+          {% else %}
+            {{ current_collection.title }}
+          {% endif %}
+        </a>
+      </li>
+    {% endif %}
+
+    <!-- Product title (if not hidden) -->
+    {% unless block.settings.hide_pro_title %}
+      <li class="flex items-center gap-4 md:gap-6">{{ product.title }}</li>
+    {% endunless %}
   </ul>
 </nav>

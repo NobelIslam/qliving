@@ -7,6 +7,29 @@
   endunless
 -%}
 
+{%- liquid
+      # Find the subcollection (one that has a parent)
+      assign subcollection = nil
+      assign parent_collection = nil
+      
+      for c in product.collections
+        if c.metafields.custom.parent_collection != blank
+          assign subcollection = c
+          assign parent_collection = c.metafields.custom.parent_collection.value
+          break
+        endif
+      endfor
+      
+      # If no subcollection found, use the first collection
+      if subcollection == blank
+        assign current_collection = product.collections | first
+      else
+        assign current_collection = subcollection
+      endif
+    -%}
+    {% assign current_collection_parent=collection.metafields.custom.parent_collection.value %}
+
+
 <ul class="flex flex-wrap{% unless section.settings.hover_menu %} gap-1{% endunless %} list-menu with-{{ section.settings.menu_active }}">
   {%- for link in main_menu.links limit: limit offset: offset -%}
     {%- liquid
@@ -25,9 +48,9 @@
     -%}
     {%- if enable_mega_menu -%}
       <li>
-        <details is="details-mega" trigger="{% if section.settings.hover_menu %}hover{% else %}click{% endif %}" level="top" {{ mega_menu_block.shopify_attributes }}>
+        <details  is="details-mega" trigger="{% if section.settings.hover_menu %}hover{% else %}click{% endif %}" level="top" {{ mega_menu_block.shopify_attributes }}>
           <summary data-link="{{ link.url }}" class="z-2 relative{% if section.settings.menu_active == 'block' %} rounded-full{% endif %}">
-            <button type="button" class="menu__item text-sm-lg flex items-center font-medium z-2 relative cursor-pointer"{% unless section_rendering_api %} is="api-magnet-button" data-id="HeaderNavMega-{{ section.id }}-{{ forloop.index }}-{{ dir }}" data-section-id="{{ section.id }}"{% else %} is="magnet-button"{% endunless %}{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %} tabindex="-1">
+            <button  type="button" class="menu__item {% if current_collection_parent.title == link.title %}active_menu_item{% endif %} {% if link.active or parent_collection.title == link.title %}active_menu_item {% endif %} text-sm-lg flex items-center font-medium z-2 relative cursor-pointer"{% unless section_rendering_api %} is="api-magnet-button" data-id="HeaderNavMega-{{ section.id }}-{{ forloop.index }}-{{ dir }}" data-section-id="{{ section.id }}"{% else %} is="magnet-button"{% endunless %}{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %} tabindex="-1">
               <span class="btn-text" data-text>
                 {%- liquid
                   echo link.title
@@ -57,7 +80,7 @@
       <li>
         <details is="details-dropdown" trigger="{% if section.settings.hover_menu %}hover{% else %}click{% endif %}" level="top">
           <summary data-link="{{ link.url }}" class="z-2 relative{% if section.settings.menu_active == 'block' %} rounded-full{% endif %}">
-            <button type="button" class="menu__item text-sm-lg flex items-center font-medium z-2 relative cursor-pointer" is="magnet-button"{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %} tabindex="-1">
+            <button  type="button" class="menu__item {% if link.active or parent_collection.title == link.title %}active_menu_item {% endif %} text-sm-lg flex items-center font-medium z-2 relative cursor-pointer" is="magnet-button"{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %} tabindex="-1">
               <span class="btn-text" data-text>
                 {%- liquid
                   echo link.title
@@ -118,12 +141,22 @@
         </details>
       </li>
     {%- else -%}
-      <li>
-        <a href="{{ link.url }}" class="menu__item text-sm-lg flex items-center font-medium z-2 relative cursor-pointer" is="magnet-link"{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %}>
-          <span class="btn-text" data-text>{{ link.title }}</span>
+      <li  {% if forloop.index == 1 %}class="home__icon" {% endif %} >
+        <a  href="{{ link.url }}" class="menu__item {% if link.active or parent_collection.title == link.title %}active_menu_item {% endif %} text-sm-lg flex items-center font-medium z-2 relative cursor-pointer" is="magnet-link"{% if section.settings.menu_active == 'block' %} data-magnet="0"{% endif %}>
+          <span class="btn-text {% if link.active %}activate{% endif %}" data-text>
+            {% if forloop.index == 1 %}
+            <svg class="icon icon-home icon-sm" viewBox="0 0 20 21" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.333 14.667v-3.713c0-1.355 0-2.033-.165-2.66a5 5 0 0 0-.818-1.702c-.387-.521-.916-.945-1.974-1.791l-.378-.303h0c-1.784-1.427-2.676-2.14-3.665-2.414a5 5 0 0 0-2.666 0c-.99.274-1.881.987-3.665 2.414h0l-.378.303c-1.058.846-1.587 1.27-1.974 1.79a5 5 0 0 0-.818 1.703c-.165.627-.165 1.305-.165 2.66v3.713a4.167 4.167 0 0 0 4.166 4.166c.92 0 1.667-.746 1.667-1.666v-3.334a2.5 2.5 0 0 1 5 0v3.334c0 .92.746 1.666 1.667 1.666a4.167 4.167 0 0 0 4.166-4.166Z"></path>
+            </svg>
+            {% else %}
+          {{ link.title }}
+            {% endif %}
+          </span>
+          {% if forloop.index != 1 %}
           {%- if section.settings.menu_active == 'block' -%}
             <span class="btn-text btn-duplicate">{{ link.title }}</span>
-          {%- endif -%}
+          {%- endif -%}  
+         {% endif %}
         </a>
       </li>
     {%- endif -%}

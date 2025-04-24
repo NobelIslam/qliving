@@ -80,9 +80,10 @@
       -%}
     </span>
   {%- endif -%}
-
+ {%- if block.settings.show_unit_price != blank -%}
   {%- unless hide_unit_price -%}
     {%- assign product_variant = product.selected_or_first_available_variant -%}
+   
     {%- if product_variant.unit_price_measurement -%}
       <span class="sr-only">{{ 'products.price.unit_price' | t }}</span>
       <span class="unit-price flex items-center">
@@ -103,4 +104,5 @@
         </span>
     {%- endif -%}
   {%- endunless -%}
+  {%- endif -%}
 </div>

@@ -73,13 +73,13 @@
             <div class="product-card__icons flex flex-nowrap{% unless icon_list_block.settings.enable_carousel %} lg:flex-wrap{% endunless %}">
               {%- for item in metafield.value -%}
                 <div class="product-card__icon shrink-0">
-                  <div class="flex flex-col items-center md:flex-row md:items-start gap-2">
+                  <div class="flex flex-col items-center md:flex-row md:items-center gap-2">
                     {%- if item.icon != blank -%}
                       <figure class="shrink-0 media media--transparent relative inline-block">
-                        {{- item.icon | image_url: width: item.icon.width | image_tag: loading: 'lazy', sizes: '32px', widths: '80,96,160,192', class: 'w-full h-full', is: 'lazy-image' -}}
+                        {{- item.icon | image_url: width: item.icon.width | image_tag: loading: 'lazy', sizes: '100px', widths: '80,96,160,192', class: 'w-full h-full', is: 'lazy-image' -}}
                       </figure>
                     {%- endif -%}
-                    <div class="flex flex-col items-center md:items-start gap-1 text-center md:text-left text-sm font-medium leading-none">
+                    <div class="flex flex-col items-center md:items-center gap-1 text-center md:text-left text-sm font-medium leading-none">
                       {{- item.title -}}
                       {%- if item.description != blank -%}
                         <p class="text-opacity font-normal text-xs leading-tight">{{ item.description }}</p>
@@ -115,7 +115,7 @@
   <div class="page-width{% if media_count > 0 %}{% if section.settings.full_width %} page-width--full{% endif %}{% else %} page-width--narrow{% endif %} relative">
     <div class="featured-product product product--{{ section.settings.gallery_layout }}{% if media_count == 0 %} no-media{% endif %} flex flex-col items-start lg:grid gap-5 w-full relative">
       {%- if media_count > 0 -%}
-        <div class="product__gallery-container flex flex-col gap-0 md:gap-8 relative w-full">
+        <div class="product__gallery-container flex flex-col gap-0 md:gap-8 relative">
           {%- render 'product-media-gallery',
             product: product,
             product_id: product.id,
@@ -258,16 +258,19 @@
 
             {%- when 'price' -%}
               <div class="product__price grid gap-3" {{ block.shopify_attributes }}>
-                <div class="no-js-hidden" id="Price-{{ section.id }}-{{ product.id }}">
-                  {%- render 'product-price', product: product, use_variant: true, class: 'flex flex-wrap items-baseline gap-2 lg:gap-1d5' -%}
+                <div class="no-js-hidden flex justify-start for_width" id="Price-{{ section.id }}-{{ product.id }}">
+                  {%- render 'product-price', product: product, use_variant: true, block: block, class: 'flex flex-wrap items-baseline gap-2 lg:gap-1d5' -%}
                   
                   {%- if product.quantity_price_breaks_configured? -%}
                     <div class="text-opacity text-sm font-medium leading-tight" id="VolumeNote-{{ section.id }}-{{ product.id }}">
                       {{- 'products.volume_pricing.note' | t -}}
                     </div>
                   {%- endif -%}
+                  <div class="ctm_badge">{%- render 'product-badges', product: product, show_save_amount: settings.product_save_amount, save_type: settings.product_save_type, class: 'z-2 grid' -%}</div>
                 </div>
 
+                
+ 
                 {%- assign product_form_installment_id = 'ProductFormInstallment-' | append: section.id | append: '-' | append: product.id -%}
                 {%- form 'product', product, id: product_form_installment_id, class: 'installment text-sm leading-tight' -%}
                   <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" />
@@ -291,7 +294,8 @@
               </div>
 
             {%- when 'quantity_selector' -%}
-              {%- if product.available -%}
+            
+            {%- if product.available -%}
                 <div id="QuantityForm-{{ section.id }}-{{ product.id }}" class="field" {{ block.shopify_attributes }}>
                   {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
                   <label for="Quantity-{{ section.id }}-{{ product.id }}" class="quantity__label label" is="quantity-label">
@@ -425,6 +429,7 @@
                   {%- endif -%}
                 </div>
               {%- endif -%}
+              
 
             {%- when 'volume_pricing' -%}
               {%- if product.quantity_price_breaks_configured? -%}
@@ -578,6 +583,7 @@
                 heading: block.settings.heading,
                 show_vendor: block.settings.show_vendor,
                 show_price: block.settings.show_price,
+                enable_slider: block.settings.enable_slider
               -%}
 
             {%- when 'liquid' -%}
@@ -588,7 +594,7 @@
               {%- endif -%}
 
             {%- when 'collapsible_tab' -%}
-              <details class="product__accordion details {{ block.settings.style }}" is="accordion-details"{% if block.settings.opened %} open{% endif %} {{ block.shopify_attributes }}>
+              <details class="product__accordion details" is="accordion-details"{% if block.settings.opened %} open{% endif %} {{ block.shopify_attributes }}>
                 <summary class="details__summary flex items-center justify-between gap-2 cursor-pointer">
                   <div class="flex items-center gap-2d5">
                     {%- render 'icon-accordion', icon: block.settings.icon -%}
@@ -687,7 +693,7 @@
               -%}
               <div id="ProductBundle-{{ section.id }}-{{ product.id }}" {{ block.shopify_attributes }}>
                 {%- if products.count > 0 -%}
-                  <details class="product__accordion details with-background" is="product-bundle-details"{% if product.selected_or_first_available_variant.available and block.settings.opened %} open{% endif %} form="{{ product_form_id }}">
+                  <details class="product__accordion details" is="product-bundle-details"{% if product.selected_or_first_available_variant.available and block.settings.opened %} open{% endif %} aria-controls="{{ product_form_id }}">
                     <summary class="details__summary flex items-center justify-between gap-2 cursor-pointer">
                       <div class="flex items-center gap-2d5">
                         {%- if block.settings.icon_image != blank -%}
@@ -718,36 +724,27 @@
                           endif
                         -%}
                         {%- if variant.product -%}
-                          {%- assign variant_image = variant.image | default: variant.product.featured_image -%}
                           <label class="product-bundle__info flex items-center gap-4 md:gap-6" for="Recommendations-{{ section.id }}-{{ variant.id }}">
-                            <input name="bundles" value="{{ variant.id }}" data-price="{{ variant.price }}" class="checkbox" id="Recommendations-{{ section.id }}-{{ variant.id }}" type="checkbox"{% unless variant.available %} disabled{% endunless %} />
-                            {%- if variant_image -%}
-                              <picture class="horizontal-product__media media media--{{ settings.product_image_ratio }}{% unless settings.product_image_fill %} media--contain{% endunless %} relative overflow-hidden shrink-0 pointer-events-none">
-                                {{- variant_image | image_url: width: variant_image.width | image_tag: loading: 'lazy', widths: '180,360,540', is: 'lazy-image' -}}
-                              </picture>
-                            {%- endif -%}
+                            <input name="bundles" value="{{ variant.id }}" class="checkbox" id="Recommendations-{{ section.id }}-{{ variant.id }}" type="checkbox"{% unless variant.available %} disabled{% endunless %} />
+                          {%- if variant.image -%}
+                            <picture class="horizontal-product__media media media--{{ settings.product_image_ratio }}{% unless settings.product_image_fill %} media--contain{% endunless %} relative overflow-hidden shrink-0">
+                              {{- variant.image | image_url: width: variant.image.width | image_tag: loading: 'lazy', widths: '180,360,540', is: 'lazy-image' -}}
+                            </picture>
+                          {%- else -%}
+                            <picture class="horizontal-product__media media media--{{ settings.product_image_ratio }}{% unless settings.product_image_fill %} media--contain{% endunless %} relative overflow-hidden shrink-0">
+                              {{- product.featured_image | image_url: width: product.featured_image.width | image_tag: loading: 'lazy', widths: '180,360,540', is: 'lazy-image' -}}
+                            </picture>
+                          {%- endif -%}
                             <div class="horizontal-product__details flex flex-col justify-start gap-1d5">
                               <div class="flex flex-col gap-1">
-                                <p class="horizontal-product__title font-medium text-base leading-tight">
-                                  {%- liquid
-                                    if block.settings.clickable
-                                      echo variant.product.title | link_to: variant.url, class: 'reversed-link'
-                                    else
-                                      echo variant.product.title | escape
-                                    endif
-                                  -%}
-                                </p>
+                                <p class="horizontal-product__title font-medium text-base leading-tight">{{ variant.product.title | escape }}</p>
                                 {%- if show_variant_title -%}
-                                  <span class="text-xs text-opacity leading-tight">{{ variant.title }}</span>
+                                  <div class="text-xs text-opacity leading-tight">{{ variant.title }}</div>
                                 {%- endif -%}
                               </div>
                             </div>
                             <div class="horizontal-product__quantity shrink-0">
-                              {%- if variant.available -%}
-                                {%- render 'product-price', product: variant.product, variant: variant, use_variant: true, class: 'flex flex-wrap items-baseline gap-2 lg:flex-col xl:items-end lg:gap-1d5' -%}
-                              {%- else -%}
-                                <span class="text-sm-base text-opacity">{{ 'products.product.sold_out' | t }}</span>
-                              {%- endif -%}
+                              {%- render 'product-price', product: variant.product, variant: variant, use_variant: true, class: 'flex flex-wrap items-baseline gap-2 lg:flex-col xl:items-end lg:gap-1d5' -%}
                             </div>
                           </label>
                         {%- endif -%}
@@ -807,7 +804,7 @@
                       </ul>
                     {%- endif -%}
                   </div>
-  
+
                 {%- else -%}
                   {%- case block.settings.type -%}
                     {%- when 'text' -%}
@@ -856,7 +853,10 @@
                   {%- endcase -%}
                 {%- endif -%}
               </div>
+             {%- when 'rich_text' -%}
+            <div class="ctm_rich">{{ block.settings.content }}</div>
           {%- endcase -%}
+          
         {%- endfor -%}
       </product-info>
     </div>
@@ -1016,8 +1016,12 @@
   <script type="application/ld+json">
     {{- product | structured_data -}}
   </script>
+  
 </div>
+<script>
+  window.product_collection = {{product.collections | json}};
 
+</script>
 {% schema %}
 {
   "name": "t:sections.main-product.name",
@@ -1269,6 +1273,11 @@
           "id": "show_collections_link",
           "label": "t:sections.main-product.blocks.breadcrumb.settings.show_collections_link.label",
           "default": true
+        },
+        {
+          "type": "checkbox",
+          "label": "Hide product title",
+          "id": "hide_pro_title"
         }
       ]
     },
@@ -1629,6 +1638,11 @@
           "id": "show_taxes_notice",
           "default": true,
           "label": "t:sections.main-product.blocks.price.settings.show_taxes_notice.label"
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unit price",
+          "id": "show_unit_price"
         }
       ]
     },
@@ -2114,6 +2128,12 @@
           "id": "show_price",
           "default": true,
           "label": "t:sections.global.settings.show_price.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_slider",
+          "label": "Enable slider",
+          "default": true
         }
       ]
     },
@@ -2121,22 +2141,6 @@
       "type": "collapsible_tab",
       "name": "t:sections.main-product.blocks.collapsible_tab.name",
       "settings": [
-        {
-          "type": "select",
-          "id": "style",
-          "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.label",
-          "options": [
-            {
-              "value": "with-border",
-              "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.options__1.label"
-            },
-            {
-              "value": "with-background",
-              "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.options__2.label"
-            }
-          ],
-          "default": "with-border"
-        },
         {
           "type": "select",
           "id": "icon",
@@ -2758,12 +2762,6 @@
           "id": "opened",
           "default": true,
           "label": "t:sections.main-product.blocks.collapsible_tab.settings.opened.label"
-        },
-        {
-          "type": "checkbox",
-          "id": "clickable",
-          "default": false,
-          "label": "t:sections.main-product.blocks.product_bundle.settings.clickable.label"
         }
       ]
     },
@@ -2893,6 +2891,17 @@
         {
           "type": "paragraph",
           "content": "t:sections.main-product.blocks.sticky_buy_button.settings.paragraph.content"
+        }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Rich text",
+      "settings": [
+        {
+          "type": "richtext",
+          "label": "Content",
+          "id": "content"
         }
       ]
     }

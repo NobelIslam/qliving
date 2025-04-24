@@ -3067,11 +3067,7 @@ class DetailsDropdown extends HTMLDetailsElement {
       
       this.setAttribute('open', '');
       this.summaryElement.setAttribute('open', '');
-      if (theme.config.motionReduced) {
-        this.contentElement.setAttribute('open', '');
-      } else {
-        setTimeout(() => this.contentElement.setAttribute('open', ''), 100);
-      }
+      setTimeout(() => this.contentElement.setAttribute('open', ''), 100);
       document.addEventListener('click', this.detectClickOutsideListener);
       document.addEventListener('keydown', this.detectEscKeyboardListener);
       document.addEventListener('focusout', this.detectFocusOutListener);
@@ -3171,8 +3167,9 @@ class DetailsMega extends DetailsDropdown {
   }
 
   async transitionOut() {
-    document.body.classList.remove('with-mega');
-    return Motion.animate(this.contentElement.firstElementChild, { visibility: 'hidden', transform: 'translateY(-105%)' }, { duration: theme.config.motionReduced ? 0 : 0.6, easing: [.7, 0, .2, 1] }).finished;
+      document.body.classList.remove('with-mega');
+    //Changed the animation duration 0.6 to 1.5 on below line
+    return Motion.animate(this.contentElement.firstElementChild, { visibility: 'hidden', transform: 'translateY(-105%)' }, { duration: theme.config.motionReduced ? 0 : 1.5, easing: [.7, 0, .2, 1] }).finished;
   }
 }
 customElements.define('details-mega', DetailsMega, { extends: 'details' });
@@ -3563,6 +3560,7 @@ class CarouselElement extends HTMLElement {
         prevNextButtons: false,
         adaptiveHeight: true,
         wrapAround: true,
+        cellAlign: 'left',
         rightToLeft: theme.config.rtl,
         initialIndex: this.initialIndex,
       });
@@ -5011,51 +5009,11 @@ class ProductForm extends HTMLFormElement {
   }
 
   get bundles() {
-    return Array.from(document.querySelectorAll(`[form="${this.getAttribute('id')}"] input[name="bundles"]:checked`));
-  }
-
-  prepareFormData(formData) {
-    const bundlesLength = this.bundles.length;
-    const itemsArray = new Array(bundlesLength + 1);
-    
-    for (let i = 0; i < bundlesLength; i++) {
-      const reverseIndex = bundlesLength - 1 - i;
-      itemsArray[i] = {
-        id: this.bundles[reverseIndex].value,
-        quantity: 1
-      };
-    }
-    
-    const allFormData = { items: itemsArray.slice(0, bundlesLength) };
-    
-    const json = {};
-    const formEntries = Array.from(formData.entries());
-    
-    for (const [name, value] of formEntries) {
-      if (name === 'id' || name === 'quantity') {
-        json[name] = value;
-      } else {
-        allFormData[name] = value;
-      }
-    }  
-    
-    allFormData.items.push(json);
-    return allFormData;
+    return Array.from(document.querySelectorAll(`[aria-controls="${this.getAttribute('id')}"] input[name="bundles"]:checked`));
   }
 
   onSubmitHandler(event) {
-    const hasBundles = this.bundles.length > 0;
-    if (document.body.classList.contains('template-cart') || theme.settings.cartType === 'page') {
-      if (hasBundles) {
-        theme.utils.postLink2(theme.routes.cart_add_url, {
-          parameters: {
-            ...this.prepareFormData(new FormData(this))
-          }    
-        });
-        event.preventDefault();
-      }
-      return;
-    }
+    if (document.body.classList.contains('template-cart') || theme.settings.cartType === 'page') return;
     
     event.preventDefault();
     if (this.submitButton.hasAttribute('aria-disabled')) return;
@@ -5076,8 +5034,20 @@ class ProductForm extends HTMLFormElement {
 
     config.body = formData;
 
-    if (hasBundles) {
-      const allFormData = this.prepareFormData(formData);
+    if (this.bundles.length > 0) {
+      let allFormData = {
+        items: this.bundles.reverse().map(item => ({
+          id: item.value,
+          quantity: 1
+        }))
+      };
+
+      const json = {};
+      for (const [name, value] of formData.entries()) {
+        name == 'id' || name == 'quantity' ? json[name] = value : allFormData[name] = value;
+      }
+      allFormData.items.push(json);
+
       config.body = JSON.stringify(allFormData);
       config.headers['Content-Type'] = 'application/json';
     }
@@ -5302,82 +5272,25 @@ class ProductBundleDetails extends AccordionDetails {
 
   cartUpdateUnsubscriber = undefined;
 
-  get productForm() {
-    return document.forms[this.getAttribute('form')];
-  }
-
-  get bundles() {
-    return Array.from(this.querySelectorAll('input[name="bundles"]:checked'));
-  }
-
   connectedCallback() {
     this.cartUpdateUnsubscriber = theme.pubsub.subscribe(theme.pubsub.PUB_SUB_EVENTS.cartUpdate, this.onCartUpdate.bind(this));
-    this.onBundleChangeListener = this.onBundleChange.bind(this);
-    this.addEventListener('change', this.onBundleChangeListener);
   }
 
   disconnectedCallback() {
     if (this.cartUpdateUnsubscriber) {
       this.cartUpdateUnsubscriber();
     }
-    this.removeEventListener('change', this.onBundleChangeListener);
   }
 
   onCartUpdate(event) {
-    if (this.bundles.length === 0) return;
-
     if (event.source === 'product-form') {
-      this.bundles.forEach((input) => {
+      Array.from(this.querySelectorAll('input[name="bundles"]:checked')).forEach((input) => {
         if (!input.disabled) input.checked = false;
       });
-      this.onBundleChange();
     }
-  }
-
-  onBundleChange() {
-    (this.productForm ?? document).dispatchEvent(new CustomEvent('bundle:change', {
-      detail: {
-        items: this.bundles.map(input => ({
-          id: input.value,
-          quantity: 1,
-          price: input.getAttribute('data-price')
-        }))
-      }
-    }));
   }
 }
 customElements.define('product-bundle-details', ProductBundleDetails, { extends: 'details' });
-
-class ProductBuyPrice extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  get productForm() {
-    return document.forms[this.getAttribute('form')];
-  }
-
-  connectedCallback() {
-    this.onBundleChangedListener = this.onBundleChanged.bind(this);
-    (this.productForm ?? document).addEventListener('bundle:change', this.onBundleChangedListener);
-  }
-
-  disconnectedCallback() {
-    (this.productForm ?? document).removeEventListener('bundle:change', this.onBundleChangedListener);
-  }
-
-  onBundleChanged(event) {
-    const { items } = event.detail;
-    let subtotal = parseInt(this.getAttribute('data-price'));
-
-    items.forEach(({ price, quantity }) => {
-      subtotal += parseInt(price) * parseInt(quantity);
-    });
-
-    this.innerHTML = theme.Currency.formatMoney(subtotal, theme.settings.currencyCodeEnabled ? theme.settings.moneyWithCurrencyFormat : theme.settings.moneyFormat);
-  }
-}
-customElements.define('product-buy-price', ProductBuyPrice);
 
 class MediaGallery extends HTMLElement {
   constructor() {
@@ -5386,6 +5299,8 @@ class MediaGallery extends HTMLElement {
     Motion.inView(this, () => {
       setTimeout(() => this.pauseAllMedia(), 500);
     });
+
+    (this.productForm ?? document).addEventListener('variant:change', this.onVariantChanged.bind(this));
 
     this.addEventListener('lightbox:open', (event) => this.openZoom(event.detail.index));
     this.sliderGallery.addEventListener('slider:change', this.onSlideChange.bind(this));
@@ -5397,12 +5312,30 @@ class MediaGallery extends HTMLElement {
     return this.querySelector('[data-shopify-xr]');
   }
 
+  get productForm() {
+    return document.forms[this.getAttribute('form')];
+  }
+
   get sliderGallery() {
     return this.querySelector('slider-element');
   }
 
+  get sliderDots() {
+    return this.querySelector('media-dots');
+  }
+
   get mediaPreview() {
     return this.querySelector('.product__preview .product__media');
+  }
+
+  get hideVariants() {
+    return this._hideVariants = this._hideVariants || this.querySelectorAll('.product__media--variant').length > 0;
+  }
+
+  get gangOption() {
+    if (this._gangOption) return this._gangOption;
+    const mediaItemWithGang = this.sliderGallery.querySelector('[data-gang-option]');
+    return mediaItemWithGang ? this._gangOption = mediaItemWithGang.getAttribute('data-gang-option') : false;
   }
 
   get photoswipe() {
@@ -5455,6 +5388,36 @@ class MediaGallery extends HTMLElement {
     return this._photoswipe = lightbox;
   }
 
+  onVariantChanged(event) {
+    const currentVariant = event.detail.variant;
+    if (!currentVariant.featured_media) return;
+
+    const newMedia = this.sliderGallery.querySelector(`[data-media-id="${currentVariant.featured_media.id}"]`);
+    if (newMedia === null) return;
+
+    if (this.gangOption) {
+      this.sliderGallery.items.forEach((item) => item.hidden = item.getAttribute('data-gang-connect') !== newMedia.getAttribute('data-gang-connect'));
+      this.sliderGallery.reset();
+
+      if (this.sliderDots) {
+        this.sliderDots.items.forEach((item) => item.hidden = item.getAttribute('data-gang-connect') !== newMedia.getAttribute('data-gang-connect'));
+        this.sliderDots.reset();
+        this.sliderDots.resetIndexes();
+        this.sliderDots.transitionTo(1, true);
+      }
+    }
+
+    this.setActiveMedia(currentVariant.featured_media.id, this.hideVariants);
+
+    if (this.mediaPreview) {
+      this.sliderGallery.querySelectorAll('[data-media-id]').forEach((media) => media.classList.remove('xl:hidden'));
+      this.mediaPreview.parentNode.replaceChild(newMedia.cloneNode(true), this.mediaPreview);
+      newMedia.classList.add('xl:hidden');
+    }
+
+    this.countMediaGallery();
+  }
+
   onSlideChange(event) {
     const activeMedia = event.detail.currentElement;
     this.playActiveMedia(activeMedia);
@@ -5464,6 +5427,45 @@ class MediaGallery extends HTMLElement {
         this.viewInSpaceButton.setAttribute('data-shopify-model3d-id', activeMedia.getAttribute('data-media-id'));
       } else {
         this.viewInSpaceButton.setAttribute('data-shopify-model3d-id', this.viewInSpaceButton.getAttribute('data-shopify-model3d-default-id'));
+      }
+    }
+  }
+
+  setActiveMedia(mediaId, prepend) {
+    const activeMedia = this.sliderGallery.querySelector(`[data-media-id="${mediaId}"]`);
+
+    if (prepend) {
+      activeMedia.parentElement.prepend(activeMedia);
+      this.sliderGallery.reset();
+
+      if (this.sliderDots) {
+        const activeThumbnail = this.sliderDots.querySelector(`[data-media-id="${mediaId}"]`);
+        activeThumbnail.parentElement.prepend(activeThumbnail);
+        this.sliderDots.reset();
+        this.sliderDots.resetIndexes();
+      }
+    }
+    else {
+      this.sliderGallery.select(this.sliderGallery.itemsToShow.indexOf(activeMedia) + 1, true);
+    }
+
+    if (this.gangOption) {
+      this.sliderGallery.select(1, true);
+    }
+
+    if (theme.config.mqlSmall) {
+      const quickViewModal = this.closest('quick-view');
+      if (quickViewModal) {
+        quickViewModal.querySelector('.quick-view__content').scrollTo({
+          top: activeMedia.getBoundingClientRect().top,
+          behavior: theme.config.motionReduced ? 'auto' : 'smooth'
+        });
+      }
+      else {
+        window.scrollTo({
+          top: activeMedia.getBoundingClientRect().top + window.scrollY - 95,
+          behavior: theme.config.motionReduced ? 'auto' : 'smooth'
+        });
       }
     }
   }
@@ -5860,8 +5862,6 @@ class TabsElement extends HTMLElement {
 
   load() {
     const toButton = this.buttons[parseInt(this.selectedIndex)];
-    if (toButton === undefined) return;
-    
     const toPanel = document.getElementById(toButton.getAttribute('aria-controls'));
     Motion.animate(toPanel, { transform: ['translateY(2rem)', 'translateY(0)'], opacity: [0, 1] }, { duration: theme.config.motionReduced ? 0 : 0.15 }).finished;
     toPanel.querySelector('motion-list')?.load();
@@ -5869,8 +5869,6 @@ class TabsElement extends HTMLElement {
 
   unload() {
     const fromButton = this.buttons[parseInt(this.selectedIndex)];
-    if (fromButton === undefined) return;
-
     const fromPanel = document.getElementById(fromButton.getAttribute('aria-controls'));
     Motion.animate(fromPanel, { transform: ['translateY(0)', 'translateY(2rem)'], opacity: [1, 0] }, { duration: theme.config.motionReduced ? 0 : 0.15 }).finished;
     fromPanel.querySelector('motion-list')?.unload();

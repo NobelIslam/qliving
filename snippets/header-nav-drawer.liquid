@@ -1,21 +1,22 @@
-{%- liquid
+ {%- liquid
   assign section_rendering_api = false
   if section.index == nil
     assign section_rendering_api = true
   endif
 -%}
+
 <details is="menu-details">
-  <summary class="drawer__menu-item block cursor-pointer relative" aria-expanded="false">
+ <summary class="drawer__menu-item block cursor-pointer relative" aria-expanded="false">
     <button type="button" class="heading text-2xl leading-none tracking-tight"{% unless section_rendering_api %} is="api-button" data-id="DrawerSubMenu-{{ section.id }}-{{ position }}" data-section-id="{{ section.id }}"{% endunless %}>
       {{- link.title | escape -}}
     </button>
   </summary>
   <div class="drawer__submenu z-1 absolute top-0 left-0 flex flex-col w-full h-full" data-parent>
-    <button type="button" class="tracking-tight heading text-base shrink-0 flex items-center gap-3 w-full" data-close>{{ link.title | escape }}</button>
+    <button type="button" class="back_button tracking-tight heading text-base shrink-0 flex items-center gap-3 w-full" data-close>{{ link.title | escape }}</button>
     {%- unless section_rendering_api -%}
-      <div id="DrawerSubMenu-{{ section.id }}-{{ position }}" class="drawer__scrollable flex flex-col h-full"></div>
+      <div id="DrawerSubMenu-{{ section.id }}-{{ position }}" class="drawer__scrollable flex flex-col h-full section_rendering_api"></div>
     {%- else -%}
-      <ul id="DrawerSubMenu-{{ section.id }}-{{ position }}" class="drawer__scrollable flex flex-col h-full">
+      <ul id="DrawerSubMenu-{{ section.id }}-{{ position }}" class="drawer__scrollable flex flex-col h-full sub_menu_drawer" {{ product.title }}>
         {%- if block.type == 'mega_menu_tab' -%}
           {%- for i in (1..5) -%}
             {%- assign tab_target_link = 'tab_target_link_' | append: i -%}
@@ -33,7 +34,7 @@
                       {{- tab_target_heading | escape -}}
                     </summary>
                     <div class="drawer__submenu z-1 absolute top-0 left-0 flex flex-col w-full h-full">
-                      <button type="button" class="tracking-tight heading text-base flex items-center gap-3 w-full" data-close>{{ block.settings[tab_target] | escape }}</button>
+                      <button type="button" class="back_button tracking-tight heading text-base flex items-center gap-3 w-full" data-close>{{ block.settings[tab_target] | escape }}</button>
                       <div class="drawer__scrollable flex flex-col h-full">
                         <div class="horizontal-products product-grid">
                           {%- for product in products limit: 4 -%}
@@ -68,14 +69,14 @@
                         </div>
                       </div>
                       <div class="drawer__sticky w-full">
-                        <a class="button button--primary icon-with-text w-full" href="{{ block.settings[tab_target_link].url }}" is="hover-link">
+                        <button class="button button--primary icon-with-text w-full" type="submit" is="hover-button">
                           <span class="btn-fill" data-fill></span>
                           <span class="btn-text">
                             {{ 'collections.subcollections.all_products' | t: collection: tab_target_heading }}
                             ({{ block.settings[tab_target_link].object.all_products_count }})
                             {%- render 'icon', icon: 'arrow-right', size: 'sm', class: 'transform' -%}
                           </span>
-                        </a>
+                        </button>
                       </div>
                     </div>
                   </details>
@@ -89,25 +90,26 @@
           {%- endfor -%}
         {%- else -%}
           {%- for childlink in link.links -%}
+            {{ product.title }} Hello
             <li class="drawer__menu-group">
               {%- if childlink.links != blank -%}
                 <details is="menu-details">
-                  <summary class="drawer__menu-item block heading text-2xl leading-none tracking-tight cursor-pointer relative" aria-expanded="false">
+                  <summary class="{% if childlink.active or subcollection.title == childlink.title %}active_menu_item {% endif %} drawer__menu-item block heading text-2xl leading-none tracking-tight cursor-pointer relative" aria-expanded="false">
                     {{- childlink.title | escape -}}
                   </summary>
                   <div class="drawer__submenu z-1 absolute top-0 left-0 flex flex-col w-full h-full">
-                    <button type="button" class="tracking-tight heading text-base flex items-center gap-3 w-full" data-close>{{ childlink.title | escape }}</button>
+                    <button type="button" class="back_button tracking-tight heading text-base flex items-center gap-3 w-full" data-close>{{ childlink.title | escape }}</button>
                     <ul class="drawer__scrollable flex flex-col h-full">
                       {%- for grandchildlink in childlink.links -%}
-                        <li class="drawer__menu-group">
-                          <a class="drawer__menu-item block heading text-2xl leading-none tracking-tight" href="{{ grandchildlink.url }}">{{ grandchildlink.title | escape }}</a>
+                        <li class="drawer__menu-group Hello {% if grandchildlink.active or subcollection.title == grandchildlink.title %}active_menu_item {% endif %}">
+                          <a class="drawer__menu-item block heading text-2xl leading-none tracking-tight" href="{{ grandchildlink.url }}">{{ grandchildlink.title | escape }}</a> 
                         </li>
                       {%- endfor -%}
                     </ul>
                   </div>
                 </details>
               {%- else -%}
-                <a class="drawer__menu-item block heading text-2xl leading-none tracking-tight" href="{{ childlink.url }}">{{ childlink.title | escape }}</a>
+                <a class="{{ subcollection }} {% if childlink.active or subcollection.title == childlink.title %}active_menu_item {% endif %} drawer__menu-item block heading text-2xl leading-none tracking-tight" href="{{ childlink.url }}">{{ childlink.title | escape }}</a>
               {%- endif -%}
             </li>
           {%- endfor -%}
@@ -194,14 +196,6 @@
                 {%- endif -%}
               {%- endfor -%}
             </ul>
-          </li>
-        {%- endif -%}
-        {%- if block.settings.button_label != blank -%}
-          <li class="mega-menu__footer">
-            <a class="button button--primary icon-with-text w-full"{% if block.settings.button_link != blank %} href="{{ block.settings.button_link }}"{% if block.settings.button_external %} target="_blank" rel="noopener"{% endif %}{% else %} role="link" aria-disabled="true"{% endif %} is="hover-link">
-              <span class="btn-fill" data-fill></span>
-              <span class="btn-text">{{ block.settings.button_label | escape }}</span>
-            </a>
           </li>
         {%- endif -%}
       </ul>

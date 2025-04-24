@@ -144,7 +144,14 @@
                   <button type="submit" class="button button--primary pointer-events-auto md:opacity-0" is="hover-button" data-variant-id="{{ product.selected_or_first_available_variant.id }}" aria-label="{{ quick_add_label | escape }}">
                     <span class="btn-fill" data-fill></span>
                     <span class="btn-text">
-                      {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                  <!-- In the below line I removed the class: 'md:hidden' for display the icon in all the breakpoints -->
+                
+
+                    <span class="btn-text">
+                   <!-- In the below line I removed the class: 'md:hidden' for display the icon in all the breakpoints -->
+                  {% comment %}
+                  {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                  {% endcomment %}
                       <span class="hidden md:block" data-sold-out="{{ 'products.product.sold_out' | t | escape }}">
                         {{- quick_add_label -}}
                       </span>
@@ -156,7 +163,11 @@
                   <button type="button" class="button button--primary pointer-events-auto md:opacity-0" is="hover-button" aria-controls="{{ quick_view_id }}" aria-expanded="false" aria-label="{{ 'products.product.choose_options' | t | escape }}">
                     <span class="btn-fill" data-fill></span>
                     <span class="btn-text">
-                      {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                   <!-- In the below line I removed the class: 'md:hidden' for display the icon in all the breakpoints -->
+                  {% comment %}
+                  {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                  {% endcomment %}
+                      <span style="margin-right:5px">{%- render 'icon', icon: 'cart', size: 'sm' -%}</span>
                       <span class="hidden md:block">
                         {{- 'products.product.choose_options' | t -}}
                       </span>
@@ -166,7 +177,11 @@
                   <a href="{{ product_url }}" class="button button--primary pointer-events-auto md:opacity-0" is="hover-link" aria-label="{{ 'products.product.view_product' | t | escape }}">
                     <span class="btn-fill" data-fill></span>
                     <span class="btn-text">
-                      {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                   <!-- In the below line I removed the class: 'md:hidden' for display the icon in all the breakpoints -->
+                  {% comment %}
+                  {%- render 'icon', icon: 'cart', size: 'sm', class: 'md:hidden' -%}
+                  {% endcomment %}
+                      <span style="margin-right:5px">{%- render 'icon', icon: 'eye', size: 'sm' -%}</span>
                       <span class="hidden md:block">
                         {{- 'products.product.view_product' | t -}}
                       </span>

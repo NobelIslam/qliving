@@ -43,7 +43,9 @@
     --color-base-highlight: {{ settings.color_highlight.rgb }};
     --color-base-background: {{ settings.color_background.rgb }};
     --color-base-button: {{ settings.color_button_background.rgb }};
+    --color-hover-button: {{ settings.color_button_background | color_darken: 5  }};
     --color-base-button-gradient: {% if settings.color_button_gradient != blank %}{{ settings.color_button_gradient }}{% else %}{{ settings.color_button_background }}{% endif %};
+    --color-hover-button-gradient: {% if settings.color_button_gradient != blank %}{{ settings.color_button_gradient }}{% else %}{{ settings.color_button_background }}{% endif %};
     --color-base-button-text: {{ settings.color_button_text.rgb }};
     --color-keyboard-focus: {{ settings.color_keyboard_focus.rgb }};
     --color-shadow: {{ settings.color_shadow.rgb }};
@@ -75,6 +77,14 @@
     --card-shadow-opacity: {{ settings.card_shadow_opacity | divided_by: 100.0 }};
     --card-shadow-horizontal-offset: {{ settings.card_shadow_horizontal_offset | divided_by: 10.0 }}rem;
     --card-shadow-vertical-offset: {{ settings.card_shadow_vertical_offset | divided_by: 10.0 }}rem;
+    
+    /*! collection card */
+    --collection-card-radius: var(--rounded-card);
+    --collection-card-border-width: {{ settings.collection_card_border_thickness | divided_by: 10.0 }}rem;
+    --collection-card-border-opacity: {{ settings.collection_card_border_opacity | divided_by: 100.0 }};
+    --collection-card-shadow-opacity: {{ settings.collection_card_shadow_opacity | divided_by: 100.0 }};
+    --collection-card-shadow-horizontal-offset: {{ settings.collection_card_shadow_horizontal_offset | divided_by: 10.0 }}rem;
+    --collection-card-shadow-vertical-offset: {{ settings.collection_card_shadow_vertical_offset | divided_by: 10.0 }}rem;
 
     /*! Buttons */
     --buttons-radius: var(--rounded-button);

@@ -1,0 +1,328 @@
+/* ================================
+  Custom styling for Q Living
+  TABLE OF CONTENTS
+
+=================================== */
+
+:root {
+  /*  Here you can re-assign the variables that you want to edit.
+  --title-sm: clamp(var(--text-2xl), 2.526vw, var(--text-5xl));
+  --title-md: clamp(var(--sp-8), 3.368vw, var(--sp-16));
+  --title-lg: clamp(var(--sp-10), 3.368vw, var(--sp-16));
+  --title-xl: clamp(var(--sp-12), 7.813vw, var(--sp-20));
+  */
+  --font-product-size: clamp(1rem, 1.2rem - 0.3vw, 0.875rem);
+}
+/* Collection card spacing - to change the padding when 6 items are shown in a row*/
+.collection-card .media-card__content {
+  --card-content-padding: clamp(var(--sp-4), 1.263vw, var(--sp-4)) clamp(var(--sp-4), 2.105vw, var(--sp-4)) clamp(var(--sp-4), 2.105vw, var(--sp-4));
+  padding: var(--card-content-padding); 
+}
+
+.style_2 .flickity-page-dots{
+  margin-block-start:0px;
+}
+.specifications.with-border .specification *:not(h1, h2, h3, h4, h5, h6, .h0, .h1, .h2, .h3, .h4, .h5, .h6) {
+  color: rgb(var(--color-foreground)/ 1);
+}
+.product-form__submit .icon-cart {
+    margin-left: 10px;
+}
+.specifications_max {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.shopify-payment-button__button--unbranded {
+    background: #3F3F3F !important;
+    color: #fff !important;
+}
+.shopify-payment-button__button--unbranded:after{
+  border: 0 !important;
+}
+@media (min-width: 1280px){
+.shopify-payment-button {
+    display: none;
+}
+}
+@media (min-width: 1440px){
+  .product-form__buttons {
+    max-width: 415px;
+}
+}
+@media (min-width: 1024px){
+ .style_2 .text-with-icons {
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+.style_2 .column {
+    width: auto;
+    align-items: center;
+    /* position: relative; */
+}
+.style_2  .text-with-icons.with-border .column+.column {
+        border-inline-start: 0; 
+}
+  @media (min-width: 750px){
+    /* .for_width{
+      max-width: 500px;
+    } */
+  }
+/* .style_2 .column:after {
+    position: absolute;
+    top: 50%;
+    display: block;
+    content: "";
+    width: 1px;
+    height: 100%;
+    background: rgb(var(--color-border));
+    transform: translateY(-50%);
+    left: -30px;
+} */
+.style_2 .column:first-child:after{
+  display: none;
+} 
+}
+.text-with-icons .column__icon svg {
+  width: var(--svg-width);
+}
+.collection-card--standard {
+  background-color: transparent !important;
+}
+.collection-card_media :is(.media,.flickity-viewport) {
+    border-start-start-radius: var(--card-radius);
+    border-start-end-radius: var(--card-radius);
+}
+.collection-card {
+  --shadow-horizontal-offset: var(--collection-card-shadow-horizontal-offset);
+  --shadow-vertical-offset: var(--collection-card-shadow-vertical-offset);
+  --shadow-opacity: var(--collection-card-shadow-opacity);
+  --border-opacity: var(--collection-card-border-opacity);
+  --product-card-quick-view-inset: var(--sp-4);
+  background-color: rgb(var(--color-placeholder));
+  border-radius: var(--collection-card-radius);
+  align-content: flex-start;
+  border: var(--collection-card-border-width) solid rgb(var(--color-foreground)/ var(--border-opacity));
+  box-shadow: var(--shadow-horizontal-offset) var(--shadow-vertical-offset) rgb(var(--color-shadow)/ var(--shadow-opacity));
+}
+
+/* BUTTON HOVER */
+.button,
+.button.button--secondary{
+  transition: background .3s ease-in-out;
+}
+.button:hover{
+  background-color: var(--color-button-hover-background);
+} 
+.button.button--secondary:hover{
+  background:rgb(var(--color-button-background));
+  color:rgb(var(--color-button-text));
+}
+.product__accordion[is="product-bundle-details"]{
+  background:transparent;
+}
+.product__accordion[is="product-bundle-details"] .details__content{
+  padding:0px;
+}
+.product__accordion[is="product-bundle-details"] .details__summary {
+    padding: var(--sp-5) var(--sp-1);
+}
+.product-bundle__info{
+  /* background:rgb(var(--color-foreground) / .025); */
+  background:#FFF;
+    padding: var(--sp-2) var(--sp-2);
+}
+
+
+/*Bullets*/
+
+li.bullet-checkmark {
+  list-style: none;
+  position: relative;
+  margin-bottom: 0.5em;
+  display: inline-block;
+}
+
+li.bullet-checkmark::before {
+  content: "";
+  position: absolute;
+  left: -1.5em; /* flyt checkmark ud til venstre */
+  top: 0.1em;
+  width: 1.2em;
+  height: 1.2em;
+  background-image: url('https://cdn.shopify.com/s/files/1/0881/0761/4551/files/checkmark.svg?v=1743282837');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Bullet Arrow with line below the text */
+li.bullet-arrow {
+  list-style: none;
+  position: relative;
+  margin-bottom: 1em;
+  color: var(--color-grey-400, #828282);
+  display: block;
+  padding-bottom: 1em;
+  border-bottom: 1px solid var(--color-grey-300, #bdbdbd);
+}
+
+li.bullet-arrow::before {
+  content: "";
+  position: absolute;
+  left: -1.5em; /* pil til venstre, ingen indrykning */
+  top: 0.4em; /* fungerer bedst til typisk teksthøjde */
+  width: 1em;
+  height: 1em;
+  background-image: url('https://cdn.shopify.com/s/files/1/0881/0761/4551/files/bullet-arrow.svg?v=1743283975');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: brightness(0) saturate(100%) invert(47%) sepia(0%) saturate(2%) hue-rotate(178deg) brightness(95%) contrast(90%);
+}
+.text-with-icons .flickity-page-dot:before {
+    width: 5.85px;
+    height: 6px;
+    background-color: #E0D9CC;
+    box-shadow: none;
+}
+.text-with-icons  .flickity-page-dot{
+  width: 1rem;
+}
+.text-with-icons .flickity-page-dot.is-selected:before, .flickity-page-dot[aria-current=true]:before {
+    background-color: #000 !important;
+}
+.text-with-icons .flickity-slider .flickity-cell {
+    width: 80%;
+}
+.featured-product .price {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+.featured-product .product__price .price__regular {
+    font-size: clamp(24px, 2.5vw, 32px);
+}
+.product__details-new .specs__sidebar>ul li {
+    flex: 1;
+  width:auto;
+  list-style-type: disc;
+}
+.metafield-rich_text_field ul {
+    padding-left: 15px;
+}
+.metafield-rich_text_field li {
+    list-style: disc;
+}
+.for_width {
+    gap: 46px;
+    align-items: center;
+}
+.for_width .price {
+    gap: 46px;
+}
+.featured-product  .badge.badge--onsale {
+    --badge-background: #F9EA42;
+    --badge-foreground: #000;
+}
+
+/* ================================
+   Custom styling by Katrine
+   Section: Product specifications
+   Date: April 2025
+=================================== */
+
+.specification h2 {
+  font-size: clamp(1.125rem, 2.5vw, 2rem); /* 18px → 32px */
+  line-height: 1.35;
+}
+
+.specification h3 {
+  font-size: clamp(1.125rem, 1.8vw, 1.5rem); /* 18px → 24px */
+}
+
+.specification h4 {
+  font-size: clamp(1rem, 1.5vw, 1.25rem); /* 16px → 20px */
+}
+
+/* Default spacing between headings */
+.specification h2:not(:first-child),
+.specification h3:not(:first-child),
+.specification h4:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+/* Extra spacing when h2 or h3 follows a paragraph */
+.specification p + h2 {
+  margin-top: 2.2rem !important;
+}
+
+.specification p + h3 {
+  margin-top: 1.8rem !important;
+}
+
+/* Mobile spacing adjustments */
+@media (max-width: 767px) {
+  .specification h2:not(:first-child) {
+    margin-top: 1.6rem;
+  }
+
+  .specification h3:not(:first-child),
+  .specification h4:not(:first-child) {
+    margin-top: 1.5rem;
+  }
+}
+
+
+/* =============================
+complementary-products CSS
+================================ */
+
+.complementary-products .horizontal-products.complementary-products__box>.horizontal-product{
+  display:flex;
+  margin-bottom:1rem;
+}
+.complementary-products__box .horizontal-product__details{
+  flex:1;
+}
+.featured-product .complementary-products__box .price{
+  flex-direction:row;
+}
+
+/* ================================
+   Custom styling by Md.Nobel
+   Section: Collection Page Product card
+   Date: April 2025
+=================================== */
+.collection  .product-card__details {
+    flex-direction: column;
+}
+.collection  .product-card__title {
+    width: 100%;
+    display: block;
+    max-width: 100%;
+}
+body.has-dropdown-menu.with-mega {
+   position: fixed;
+    width: 100%;
+    top: 0;
+    overflow-y: scroll; /* keeps scrollbar visible */
+}
+.product-card .product-card__content .price--on-sale{
+  flex-direction: row;
+}
+.cart-drawer-button .count {
+    color: rgb(var(--color-button-text));
+    background: rgb(var(--color-button-background));
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+.cart-drawer-button .count[hidden] {
+    display: none;
+}

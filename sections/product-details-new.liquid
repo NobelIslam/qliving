@@ -19,11 +19,11 @@
 -%}
 
 <div class="section section--padding{% if section.settings.divider %} section--divider{% endif %}{% if section.settings.rounded %} section--rounded relative{% endif %}{% if enable_split_mode == false %} specifications-section{% endif %}">
-  <div class="page-width{% if section.settings.full_width %} page-width--full{% endif %} relative">
+  <div class="page-width{% if section.settings.full_width %} page-width--full{% endif %} product__details-new relative">
     {%- render 'section-heading', section: section -%}
 
     <div class="specifications {{ section.settings.style }} flex flex-col lg:flex-row">
-      <div class="grow{% if description != blank and description.settings.split_mode == true %} flex flex-col items-start lg:grid grid-cols-2 gap-8 lg:gap-14{% endif %}">
+      <div class="grow{% if description != blank and description.settings.split_mode == true %} flex flex-col items-start lg:grid grid-cols-2 gap-8 lg:gap-14{% endif %}  {% unless product.metafields.custom.included_in_package  %} specifications_max {% endunless %}">
         {%- if enable_split_mode == true -%}
           <sticky-element class="lg:sticky top-0 flex flex-col gap-1d5" {{ description.shopify_attributes }}>
             {%- if description.settings.heading != blank -%}
@@ -193,15 +193,16 @@
           {%- endfor -%}
         </accordions-details>
       </div>
+      {%- if product.metafields.custom.included_in_package != blank -%}
       {%- if specifications.size > 0 -%}
         <div class="grow-0">
-          <sticky-element class="specs__sidebar flex flex-col gap-7d5 md:gap-10 sticky top-0 text-center">
+          <sticky-element class="specs__sidebar flex flex-col gap-7d5 md:gap-10 sticky top-0 ">
             <svg class="icon-box" viewBox="0 0 234 74" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 20C0 8.95431 8.95431 0 20 0H214C225.046 0 234 8.9543 234 20V74H0V20Z" fill="currentColor"/>
               <rect x="58" y="32" width="118" height="19" rx="9.5" class="fill"/>
               <circle cx="117.5" cy="32.5" r="11.5" class="fill"/>
             </svg>
-            <p class="heading lg:text-3xl text-2xl leading-none tracking-tight">{{ section.settings.specifications_heading | escape }}</p>
+                <p class="heading lg:text-3xl text-2xl leading-none tracking-tight">{{ section.settings.specifications_heading | escape }}</p>
             <ul class="flex flex-wrap items-start justify-center gap-6 md:gap-10">
               {%- for block in specifications -%}
                 {%- if block.settings.icon != blank or block.settings.heading != blank -%}
@@ -222,13 +223,14 @@
           </sticky-element>
         </div>
       {%- endif -%}
+      {%- endif -%}
     </div>
   </div>
 </div>
 
 {% schema %}
 {
-  "name": "t:sections.product-details.name",
+  "name": "Product details new",
   "settings": [
     {
       "type": "select",
@@ -1117,7 +1119,7 @@
   ],
   "presets": [
     {
-      "name": "t:sections.product-details.presets.name",
+      "name": "Product details new",
       "blocks": [
         {
           "type": "description"

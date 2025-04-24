@@ -63,7 +63,7 @@
 
     <div class="product-form__buttons grid gap-4"{% unless product.quantity_price_breaks_configured? and show_quantity_selector %} id="QuantityForm-{{ section_id }}-{{ product_id }}"{% endunless %}>
       <div class="product-form__error-message alert alert--error text-sm font-medium leading-tight" role="alert" hidden></div>
-
+      
       {%- if product.quantity_price_breaks_configured? and show_quantity_selector -%}
         <div id="QuantityForm-{{ section_id }}-{{ product_id }}" class="field">
           {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
@@ -198,9 +198,11 @@
           {%- endif -%}
         </div>
       {%- endif -%}
+    
       <div class="buy-buttons{% if enable_back_in_stock %} back-in-stock{% endif %}{% if product.quantity_price_breaks_configured? != true and show_quantity_selector or show_price %} flex flex-wrap{% else %} grid{% endif %} gap-4">
         {%- if product.quantity_price_breaks_configured? != true and show_quantity_selector -%}
           {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
+          {%- unless product.metafields.custom.hide_quantity_selector.value -%}
           <label for="Quantity-{{ section_id }}-{{ product_id }}" class="label sr-only">{{ 'products.quantity.label' | t }}</label>
           <quantity-input class="quantity inline-flex shrink-0 relative" data-section-id="{{ section_id }}" data-product-id="{{ product_id }}">
             <button type="button" name="minus" class="quantity__button" aria-label="{{ 'products.quantity.decrease' | t: product: product.title | escape }}">
@@ -229,6 +231,7 @@
               {%- render 'icon', icon: 'chevron-right', size: 'sm', class: 'stroke-2 transform' -%}
             </button>
           </quantity-input>
+           {%- endunless -%}
         {%- endif -%}
         
         <button
@@ -255,18 +258,15 @@
               -%}
             </span>
             {%- if show_price -%}
-              <div id="BuyButtonPrice-{{ section.id }}-{{ product.id }}" class="flex">
+              <div id="BuyButtonPrice-{{ section.id }}-{{ product.id }}" class="flex items-center">
                 <span class="relative">&nbsp;&nbsp;-&nbsp;&nbsp;</span>
-                <product-buy-price class="price" data-price="{{ product.selected_or_first_available_variant.price }}" form="{{ product_form_id }}">
-                  {%- liquid
-                    assign price = product.selected_or_first_available_variant.price | default: 1999
-                    if settings.currency_code_enabled
-                      echo price | money_with_currency
-                    else
-                      echo price | money
-                    endif
-                  -%}
-                </product-buy-price>
+                {%- liquid
+                  if product == null
+                    assign placeholder = true
+                  endif
+                  render 'product-price', product: product, placeholder: placeholder, use_variant: true
+                -%}
+                {%- render 'icon', icon: 'cart', size: 'sm' -%}
               </div>
             {%- endif -%}
           </span>

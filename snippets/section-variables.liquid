@@ -35,6 +35,7 @@
 
 {%- if section.settings.color_button_background != blank and section.settings.color_button_background != 'rgba(0,0,0,0)' -%}
   --color-button-background: {{ section.settings.color_button_background.rgb }};
+  --color-button-hover-background: {{ section.settings.color_button_background | color_darken: 5  }};
   --color-button-border: {{ section.settings.color_button_background.rgb }};
 {%- endif -%}
 

@@ -121,7 +121,7 @@
       {%- assign spinning_block = section.blocks | where: 'type', 'spinning_text' | first -%}
       <div class="featured-product product product--{{ section.settings.gallery_layout }}{% if media_count == 0 %} no-media{% endif %} flex flex-col items-start lg:grid gap-5 w-full relative">
         {%- if media_count > 0 -%}
-          <div class="product__gallery-container flex flex-col gap-0 md:gap-8 relative w-full">
+          <div class="product__gallery-container flex flex-col gap-0 md:gap-8 relative">
             {%- render 'product-media-gallery',
               product: product,
               product_id: product.id,
@@ -593,7 +593,7 @@
                 {%- endif -%}
 
               {%- when 'collapsible_tab' -%}
-                <details class="product__accordion details {{ block.settings.style }}" is="accordion-details"{% if block.settings.opened %} open{% endif %} {{ block.shopify_attributes }}>
+                <details class="product__accordion details" is="accordion-details"{% if block.settings.opened %} open{% endif %} {{ block.shopify_attributes }}>
                   <summary class="details__summary flex items-center justify-between gap-2 cursor-pointer">
                     <div class="flex items-center gap-2d5">
                       {%- render 'icon-accordion', icon: block.settings.icon -%}
@@ -700,7 +700,7 @@
                 -%}
                 <div id="ProductBundle-{{ section.id }}-{{ product.id }}" {{ block.shopify_attributes }}>
                   {%- if products.count > 0 -%}
-                    <details class="product__accordion details with-background" is="product-bundle-details"{% if product.selected_or_first_available_variant.available and block.settings.opened %} open{% endif %} form="{{ product_form_id }}">
+                    <details class="product__accordion details" is="product-bundle-details"{% if product.selected_or_first_available_variant.available and block.settings.opened %} open{% endif %} aria-controls="{{ product_form_id }}">
                       <summary class="details__summary flex items-center justify-between gap-2 cursor-pointer">
                         <div class="flex items-center gap-2d5">
                           {%- if block.settings.icon_image != blank -%}
@@ -731,36 +731,23 @@
                             endif
                           -%}
                           {%- if variant.product -%}
-                            {%- assign variant_image = variant.image | default: variant.product.featured_image -%}
                             <label class="product-bundle__info flex items-center gap-4 md:gap-6" for="Recommendations-{{ section.id }}-{{ variant.id }}">
-                              <input name="bundles" value="{{ variant.id }}" data-price="{{ variant.price }}" class="checkbox" id="Recommendations-{{ section.id }}-{{ variant.id }}" type="checkbox"{% unless variant.available %} disabled{% endunless %} />
-                              {%- if variant_image -%}
-                                <picture class="horizontal-product__media media media--{{ settings.product_image_ratio }}{% unless settings.product_image_fill %} media--contain{% endunless %} relative overflow-hidden shrink-0 pointer-events-none">
-                                  {{- variant_image | image_url: width: variant_image.width | image_tag: loading: 'lazy', widths: '180,360,540', is: 'lazy-image' -}}
+                              <input name="bundles" value="{{ variant.id }}" class="checkbox" id="Recommendations-{{ section.id }}-{{ variant.id }}" type="checkbox"{% unless variant.available %} disabled{% endunless %} />
+                              {%- if variant.image -%}
+                                <picture class="horizontal-product__media media media--{{ settings.product_image_ratio }}{% unless settings.product_image_fill %} media--contain{% endunless %} relative overflow-hidden shrink-0">
+                                  {{- variant.image | image_url: width: variant.image.width | image_tag: loading: 'lazy', widths: '180,360,540', is: 'lazy-image' -}}
                                 </picture>
                               {%- endif -%}
                               <div class="horizontal-product__details flex flex-col justify-start gap-1d5">
                                 <div class="flex flex-col gap-1">
-                                  <p class="horizontal-product__title font-medium text-base leading-tight">
-                                    {%- liquid
-                                      if block.settings.clickable
-                                        echo variant.product.title | link_to: variant.url, class: 'reversed-link'
-                                      else
-                                        echo variant.product.title | escape
-                                      endif
-                                    -%}
-                                  </p>
+                                  <p class="horizontal-product__title font-medium text-base leading-tight">{{ variant.product.title | escape }}</p>
                                   {%- if show_variant_title -%}
-                                    <span class="text-xs text-opacity leading-tight">{{ variant.title }}</span>
+                                    <div class="text-xs text-opacity leading-tight">{{ variant.title }}</div>
                                   {%- endif -%}
                                 </div>
                               </div>
                               <div class="horizontal-product__quantity shrink-0">
-                                {%- if variant.available -%}
-                                  {%- render 'product-price', product: variant.product, variant: variant, use_variant: true, class: 'flex flex-wrap items-baseline gap-2 lg:flex-col xl:items-end lg:gap-1d5' -%}
-                                {%- else -%}
-                                  <span class="text-sm-base text-opacity">{{ 'products.product.sold_out' | t }}</span>
-                                {%- endif -%}
+                                {%- render 'product-price', product: variant.product, variant: variant, use_variant: true, class: 'flex flex-wrap items-baseline gap-2 lg:flex-col xl:items-end lg:gap-1d5' -%}
                               </div>
                             </label>
                           {%- endif -%}
@@ -1967,22 +1954,6 @@
       "settings": [
         {
           "type": "select",
-          "id": "style",
-          "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.label",
-          "options": [
-            {
-              "value": "with-border",
-              "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.options__1.label"
-            },
-            {
-              "value": "with-background",
-              "label": "t:sections.main-product.blocks.collapsible_tab.settings.style.options__2.label"
-            }
-          ],
-          "default": "with-border"
-        },
-        {
-          "type": "select",
           "id": "icon",
           "label": "t:sections.global.settings.icon.label",
           "default": "none",
@@ -2602,12 +2573,6 @@
           "id": "opened",
           "default": true,
           "label": "t:sections.main-product.blocks.collapsible_tab.settings.opened.label"
-        },
-        {
-          "type": "checkbox",
-          "id": "clickable",
-          "default": false,
-          "label": "t:sections.main-product.blocks.product_bundle.settings.clickable.label"
         }
       ]
     },

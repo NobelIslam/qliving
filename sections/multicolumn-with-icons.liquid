@@ -7,7 +7,7 @@
 </style>
 
 <div class="section section--padding{% if section.settings.divider %} section--divider{% endif %}{% if section.settings.rounded %} section--rounded relative{% endif %}">
-  <div class="page-width{% if section.settings.full_width %} page-width--full{% endif %} relative">
+  <div class="page-width{% if section.settings.full_width %} page-width--full{% endif %} relative style_{{ section.settings.section_style }}">
     {%- render 'section-heading', section: section -%}
 
     <carousel-element class="text-with-icons {{ section.settings.style }} block lg:grid grid--{{ section.settings.columns }} relative z-1" watch-css>
@@ -18,9 +18,9 @@
         endif
       -%}
       {%- for block in section.blocks -%}
-        <div class="column flex gap-5 w-full flex-col xl:flex-row xl:text-{{ section.settings.text_alignment }} text-center" {{ block.shopify_attributes }}>
+        <div class="column flex gap-5 w-full items-center justify-center xl:flex-row xl:text-{{ section.settings.text_alignment }} " {{ block.shopify_attributes }}>
           {%- if block.settings.custom_icon != blank -%}
-            <div class="column__icon with-svg">
+            <div class="column__icon with-svg" style="--svg-width: {{ block.settings.icon_width }}px;">
               {{- block.settings.custom_icon -}}
             </div>
           {%- elsif block.settings.icon != 'none' -%}
@@ -51,6 +51,22 @@
 {
   "name": "t:sections.multicolumn-with-icons.name",
   "settings": [
+   {
+      "type": "select",
+      "id": "section_style",
+      "label": "Styles",
+      "options": [
+        {
+          "value": "1",
+          "label": "Style 1"
+        },
+        {
+          "value": "2",
+          "label": "Style 2"
+        }
+      ],
+      "default": "1"
+    },
     {
       "type": "select",
       "id": "style",
@@ -618,6 +634,16 @@
           "id": "custom_icon",
           "label": "t:sections.multicolumn.blocks.column.settings.custom_icon.label",
           "info": "t:sections.multicolumn.blocks.column.settings.custom_icon.info"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "min": 15,
+          "max": 76,
+          "step": 1,
+          "unit": "px",
+          "label": "Custom icon size",
+          "default": 76
         },
         {
           "type": "inline_richtext",

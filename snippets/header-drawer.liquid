@@ -34,8 +34,30 @@ endif
       <nav class="relative grow overflow-hidden" role="navigation">
         <ul class="drawer__scrollable drawer__menu relative w-full h-full" role="list" data-parent>
           {%- assign main_menu = section.settings.menu_mobile | default: section.settings.menu -%}
+
+          {%- liquid
+      # Find the subcollection (one that has a parent)
+      assign subcollection = nil
+      assign parent_collection = nil
+      
+      for c in product.collections
+        if c.metafields.custom.parent_collection != blank
+          assign subcollection = c
+          assign parent_collection = c.metafields.custom.parent_collection.value
+          break
+        endif
+      endfor
+      
+      # If no subcollection found, use the first collection
+      if subcollection == blank
+        assign current_collection = product.collections | first
+      else
+        assign current_collection = subcollection
+      endif
+    -%}
+
           {%- for link in main_menu.links -%}
-            <li class="drawer__menu-group">
+            <li class="drawer__menu-group {% if link.active or parent_collection.title == link.title %}active_menu_item {% endif %}">
               {%- liquid
                 assign enable_mega_menu = false
                 assign mega_menu_block = nil
@@ -50,9 +72,10 @@ endif
                   endif
                 endfor
               -%}
+              
 
               {%- if link.links != blank or enable_mega_menu -%}
-                {%- render 'header-nav-drawer', link: link, enable_mega_menu: enable_mega_menu, block: mega_menu_block, position: forloop.index -%}
+                {%- render 'header-nav-drawer', link: link, enable_mega_menu: enable_mega_menu,product__title:product,sub_collection:subcollection.title, block: mega_menu_block, position: forloop.index -%}
               {%- else -%}
                 <a class="drawer__menu-item block heading text-2xl leading-none tracking-tight" href="{{ link.url }}">{{ link.title | escape }}</a>
               {%- endif -%}

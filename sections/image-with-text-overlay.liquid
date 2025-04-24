@@ -17,7 +17,6 @@
     }
   {% endif -%}
 </style>
-
 <div class="section section--padding{% if section.settings.divider %} section--divider{% endif %}{% if section.settings.rounded %} section--rounded relative{% endif %}"{% if section.settings.transparent_header %} allow-transparent-header{% endif %}>
   <div class="{% unless section.settings.full_width %}page-width {% endunless %}relative">
     <div class="banner media--{{ section.settings.image_height }} mobile:media--{{ section.settings.image_height_mobile }} relative">
@@ -68,6 +67,12 @@
                               {%- render 'icon', icon: 'home', size: 'sm' -%}
                             </a>
                           </li>
+                          {% if collection.metafields.custom.parent_collection !=blank %}
+                          <li class="flex items-center gap-4 md:gap-6">
+                             {{ collection.metafields.custom.parent_collection.value.title | link_to:collection.metafields.custom.parent_collection.value.url }}
+                          </li>
+                         
+                          {% endif %}
                           <li class="flex items-center gap-4 md:gap-6">{{ page_title }}</li>
                         </ul>
                       </nav>
